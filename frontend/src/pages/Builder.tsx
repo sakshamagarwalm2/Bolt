@@ -201,7 +201,7 @@ export function Builder() {
         <div className="h-full grid grid-cols-4 gap-6 p-6">
           <div className="col-span-1 space-y-6 overflow-auto">
             <div>
-              <div className="max-h-[75vh] overflow-scroll ">
+              <div className="max-h-[75vh] overflow-hidden ">
                 <StepsList
                   steps={steps}
                   currentStep={currentStep}

@@ -71,7 +71,7 @@ app.post("/chat", async (req, res) => {
                 content: req.body.prompt
             }],
             model: 'llama3-8b-8192',
-            max_tokens: 10000,
+            max_tokens: 30000,
         });
 
         // Extract the text response

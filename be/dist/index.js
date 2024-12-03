@@ -79,7 +79,7 @@ app.post("/chat", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                     content: req.body.prompt
                 }],
             model: 'llama3-8b-8192',
-            max_tokens: 10000,
+            max_tokens: 30000,
         });
         // Extract the text response
         const responseText = ((_b = (_a = response.choices[0]) === null || _a === void 0 ? void 0 : _a.message) === null || _b === void 0 ? void 0 : _b.content) || "";
