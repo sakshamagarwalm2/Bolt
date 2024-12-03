@@ -3,6 +3,7 @@ require("dotenv").config();
 
 import Groq from "groq-sdk";
 import { ChatCompletionCreateParams, ChatCompletion } from "groq-sdk/resources/chat/completions";
+import { getSystemPrompt } from "./prompts";
 
 // Create a type for the message object
 type Message = {
@@ -47,6 +48,11 @@ export async function main(): Promise<void> {
 export async function getGroqChatCompletionStream() {
   // Define messages with explicit typing
   const messages: Message[] = [
+    // SYSTEM: Add system prompt using imported function
+    {
+        role: "system",
+        content: getSystemPrompt(),
+      },
     {
       role: "user",
       content: "what is 2+2",
@@ -57,9 +63,10 @@ export async function getGroqChatCompletionStream() {
   return groq.chat.completions.create({
     messages,
     model: "llama3-8b-8192",
-    max_tokens:1000,
+    // max_tokens:1000,
     temperature:0.7,
     stream: true,
+    
   });
 }
 
