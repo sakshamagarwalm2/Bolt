@@ -8,90 +8,92 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __asyncValues = (this && this.__asyncValues) || function (o) {
-    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
-    var m = o[Symbol.asyncIterator], i;
-    return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
-    function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
-    function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.main = main;
-exports.getGroqChatCompletionStream = getGroqChatCompletionStream;
-require("dotenv").config();
+require("dotenv/config");
+const express_1 = __importDefault(require("express"));
 const groq_sdk_1 = __importDefault(require("groq-sdk"));
-// Initialize Groq client with explicit type
+const prompts_1 = require("./prompts");
+const node_1 = require("./defaults/node");
+const react_1 = require("./defaults/react");
+// import cors from "cors";
+// Initialize Groq client
 const groq = new groq_sdk_1.default({
     apiKey: process.env.GROQ_API_KEY
 });
-function main() {
-    return __awaiter(this, void 0, void 0, function* () {
-        var _a, e_1, _b, _c;
-        var _d, _e;
-        try {
-            // SYSTEM: Add system prompt to messages
-            const stream = yield getGroqChatCompletionStream();
-            // STREAM: Collect the streamed content
-            let fullContent = '';
-            try {
-                // STREAM: Iterate through the streamed chunks
-                for (var _f = true, stream_1 = __asyncValues(stream), stream_1_1; stream_1_1 = yield stream_1.next(), _a = stream_1_1.done, !_a; _f = true) {
-                    _c = stream_1_1.value;
-                    _f = false;
-                    const chunk = _c;
-                    // STREAM: Check if the chunk contains a content delta
-                    const contentDelta = (_e = (_d = chunk.choices[0]) === null || _d === void 0 ? void 0 : _d.delta) === null || _e === void 0 ? void 0 : _e.content;
-                    if (contentDelta) {
-                        // STREAM: Print each chunk in real-time
-                        process.stdout.write(contentDelta);
-                        // STREAM: Accumulate the full content
-                        fullContent += contentDelta;
-                    }
-                }
-            }
-            catch (e_1_1) { e_1 = { error: e_1_1 }; }
-            finally {
-                try {
-                    if (!_f && !_a && (_b = stream_1.return)) yield _b.call(stream_1);
-                }
-                finally { if (e_1) throw e_1.error; }
-            }
-            // STREAM: Add a newline after streaming is complete
-            console.log('\n');
-            // Optional: Log the full accumulated content
-            console.log('\n--- Full Streamed Content ---');
-            console.log(fullContent);
-        }
-        catch (error) {
-            console.error("Error in main function:", error);
-        }
-    });
-}
-function getGroqChatCompletionStream() {
-    return __awaiter(this, void 0, void 0, function* () {
-        // SYSTEM: Create messages array with system and user messages
-        const messages = [
-            // SYSTEM: Add system prompt using imported function
-            // {
-            //   role: "system",
-            //   content: "ans in one word only",
-            // },
-            {
-                role: "user",
-                content: "what is 2+2",
-            },
-        ];
-        // STREAM: Create chat completion with streaming enabled
-        return groq.chat.completions.create({
-            messages,
-            model: "llama3-8b-8192",
-            // STREAM: Add stream option to true for streaming response
-            stream: true,
+const app = (0, express_1.default)();
+// app.use(cors());
+app.use(express_1.default.json());
+app.post("/template", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b, _c;
+    try {
+        // Create Groq chat completion for template selection
+        const response = yield groq.chat.completions.create({
+            messages: [{
+                    role: "system",
+                    content: "Return either node or react based on what do you think this project should be. Only return a single word either 'node' or 'react'. Do not return anything extra",
+                },
+                {
+                    role: 'user',
+                    content: req.body.prompt
+                }],
+            model: 'llama3-8b-8192',
+            max_tokens: 200,
         });
-    });
-}
-// Immediately invoke the main function
-main().catch(console.error);
+        // Extract the text response
+        const answer = (_c = (_b = (_a = response.choices[0]) === null || _a === void 0 ? void 0 : _a.message) === null || _b === void 0 ? void 0 : _b.content) === null || _c === void 0 ? void 0 : _c.trim();
+        if (answer === "react") {
+            res.json({
+                prompts: [prompts_1.BASE_PROMPT, `Here is an artifact that contains all files of the project visible to you.\nConsider the contents of ALL files in the project.\n\n${react_1.basePrompt}\n\nHere is a list of files that exist on the file system but are not being shown to you:\n\n  - .gitignore\n  - package-lock.json\n`],
+                uiPrompts: [react_1.basePrompt]
+            });
+            return;
+        }
+        if (answer === "node") {
+            res.json({
+                prompts: [`Here is an artifact that contains all files of the project visible to you.\nConsider the contents of ALL files in the project.\n\n${react_1.basePrompt}\n\nHere is a list of files that exist on the file system but are not being shown to you:\n\n  - .gitignore\n  - package-lock.json\n`],
+                uiPrompts: [node_1.basePrompt]
+            });
+            return;
+        }
+        res.status(403).json({ message: "You can't access this" });
+    }
+    catch (error) {
+        console.error("Template route error:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+}));
+app.post("/chat", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b;
+    try {
+        // Create Groq chat completion for chat route
+        const response = yield groq.chat.completions.create({
+            messages: [{
+                    role: "system",
+                    content: (0, prompts_1.getSystemPrompt)()
+                },
+                {
+                    role: 'user',
+                    content: req.body.prompt
+                }],
+            model: 'llama3-8b-8192',
+            max_tokens: 10000,
+        });
+        // Extract the text response
+        const responseText = ((_b = (_a = response.choices[0]) === null || _a === void 0 ? void 0 : _a.message) === null || _b === void 0 ? void 0 : _b.content) || "";
+        console.log(response);
+        res.json({
+            response: responseText
+        });
+    }
+    catch (error) {
+        console.error("Chat route error:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+}));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});

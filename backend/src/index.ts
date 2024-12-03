@@ -4,7 +4,7 @@ import Groq from "groq-sdk";
 import { BASE_PROMPT, getSystemPrompt } from "./prompts";
 import { basePrompt as nodeBasePrompt } from "./defaults/node";
 import { basePrompt as reactBasePrompt } from "./defaults/react";
-import cors from "cors";
+// import cors from "cors";
 
 // Initialize Groq client
 const groq = new Groq({ 
@@ -12,7 +12,7 @@ const groq = new Groq({
 });
 
 const app = express();
-app.use(cors());
+// app.use(cors());
 app.use(express.json());
 
 app.post("/template", async (req, res) => {
@@ -71,7 +71,7 @@ app.post("/chat", async (req, res) => {
                 content: req.body.prompt
             }],
             model: 'llama3-8b-8192',
-            max_tokens: 8000,
+            max_tokens: 10000,
         });
 
         // Extract the text response
