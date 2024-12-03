@@ -17,6 +17,7 @@ export function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center p-4">
+      <div className=" absolute h-full w-full flex justify-center items-center bg-black text-white md:hidden">Only work in lp</div>
       <div className="max-w-2xl w-full">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">

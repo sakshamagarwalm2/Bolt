@@ -18,13 +18,13 @@ const groq_sdk_1 = __importDefault(require("groq-sdk"));
 const prompts_1 = require("./prompts");
 const node_1 = require("./defaults/node");
 const react_1 = require("./defaults/react");
-// import cors from "cors";
+const cors_1 = __importDefault(require("cors"));
 // Initialize Groq client
 const groq = new groq_sdk_1.default({
     apiKey: process.env.GROQ_API_KEY
 });
 const app = (0, express_1.default)();
-// app.use(cors());
+app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 app.post("/template", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b, _c;
