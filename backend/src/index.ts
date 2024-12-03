@@ -1,75 +1,93 @@
-/// <reference types="node" />
-require("dotenv").config();
-
+import "dotenv/config";
+import express from "express";
 import Groq from "groq-sdk";
-import { ChatCompletionCreateParams, ChatCompletion } from "groq-sdk/resources/chat/completions";
-import { getSystemPrompt } from "./prompts";
+import { BASE_PROMPT, getSystemPrompt } from "./prompts";
+import { basePrompt as nodeBasePrompt } from "./defaults/node";
+import { basePrompt as reactBasePrompt } from "./defaults/react";
+import cors from "cors";
 
-// Create a type for the message object
-type Message = {
-  role: "system" | "user" | "assistant";
-  content: string;
-};
-
-// Initialize Groq client with explicit type
+// Initialize Groq client
 const groq = new Groq({ 
   apiKey: process.env.GROQ_API_KEY as string 
 });
 
-export async function main(): Promise<void> {
-  try {
-    // STREAM: Add stream option to enable streaming response
-    const stream = await getGroqChatCompletionStream();
-    
-    // STREAM: Collect the streamed content
-    let fullContent = '';
-    
-    // STREAM: Iterate through the streamed chunks
-    for await (const chunk of stream) {
-      // STREAM: Check if the chunk contains a content delta
-      const contentDelta = chunk.choices[0]?.delta?.content;
-      if (contentDelta) {
-        // STREAM: Print each chunk in real-time
-        process.stdout.write(contentDelta);
-        
-        // STREAM: Accumulate the full content
-        fullContent += contentDelta;
-      }
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+app.post("/template", async (req, res) => {
+    try {
+        // Create Groq chat completion for template selection
+        const response = await groq.chat.completions.create({
+            messages: [{
+                role: "system",
+                content:"Return either node or react based on what do you think this project should be. Only return a single word either 'node' or 'react'. Do not return anything extra",
+              },
+              {
+                role: 'user', 
+                content: req.body.prompt
+            }],
+            model: 'llama3-8b-8192',
+            max_tokens: 200,
+        });
+
+        // Extract the text response
+        const answer = response.choices[0]?.message?.content?.trim();
+
+        if (answer === "react") {
+            res.json({
+                prompts: [BASE_PROMPT, `Here is an artifact that contains all files of the project visible to you.\nConsider the contents of ALL files in the project.\n\n${reactBasePrompt}\n\nHere is a list of files that exist on the file system but are not being shown to you:\n\n  - .gitignore\n  - package-lock.json\n`],
+                uiPrompts: [reactBasePrompt]
+            });
+            return;
+        }
+
+        if (answer === "node") {
+            res.json({
+                prompts: [`Here is an artifact that contains all files of the project visible to you.\nConsider the contents of ALL files in the project.\n\n${reactBasePrompt}\n\nHere is a list of files that exist on the file system but are not being shown to you:\n\n  - .gitignore\n  - package-lock.json\n`],
+                uiPrompts: [nodeBasePrompt]
+            });
+            return;
+        }
+
+        res.status(403).json({message: "You can't access this"});
+    } catch (error) {
+        console.error("Template route error:", error);
+        res.status(500).json({message: "Internal server error"});
     }
-    
-    // STREAM: Add a newline after streaming is complete
-    console.log('\n');
-    
-  } catch (error) {
-    console.error("Error in main function:", error);
-  }
-}
+});
 
-export async function getGroqChatCompletionStream() {
-  // Define messages with explicit typing
-  const messages: Message[] = [
-    // SYSTEM: Add system prompt using imported function
-    {
-        role: "system",
-        content: getSystemPrompt(),
-      },
-    {
-      role: "user",
-      content: "what is 2+2",
-    },
-  ];
+app.post("/chat", async (req, res) => {
+    try {
 
-  // STREAM: Create chat completion with streaming enabled
-  return groq.chat.completions.create({
-    messages,
-    model: "llama3-8b-8192",
-    // max_tokens:1000,
-    temperature:0.7,
-    stream: true,
-    
-  });
-}
+        // Create Groq chat completion for chat route
+        const response = await groq.chat.completions.create({
+            messages: [{
+                role: "system",
+                content:getSystemPrompt()
+            },
+              {
+                role: 'user', 
+                content: req.body.prompt
+            }],
+            model: 'llama3-8b-8192',
+            max_tokens: 8000,
+        });
 
-// Immediately invoke the main function
-main().catch(console.error);
+        // Extract the text response
+        const responseText = response.choices[0]?.message?.content || "";
 
+        console.log(response);
+        res.json({
+            response: responseText
+        });
+    } catch (error) {
+        console.error("Chat route error:", error);
+        res.status(500).json({message: "Internal server error"});
+    }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});

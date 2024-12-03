@@ -21,7 +21,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.main = main;
 exports.getGroqChatCompletionStream = getGroqChatCompletionStream;
-/// <reference types="node" />
 require("dotenv").config();
 const groq_sdk_1 = __importDefault(require("groq-sdk"));
 // Initialize Groq client with explicit type
@@ -33,7 +32,7 @@ function main() {
         var _a, e_1, _b, _c;
         var _d, _e;
         try {
-            // STREAM: Add stream option to enable streaming response
+            // SYSTEM: Add system prompt to messages
             const stream = yield getGroqChatCompletionStream();
             // STREAM: Collect the streamed content
             let fullContent = '';
@@ -62,6 +61,9 @@ function main() {
             }
             // STREAM: Add a newline after streaming is complete
             console.log('\n');
+            // Optional: Log the full accumulated content
+            console.log('\n--- Full Streamed Content ---');
+            console.log(fullContent);
         }
         catch (error) {
             console.error("Error in main function:", error);
@@ -70,8 +72,13 @@ function main() {
 }
 function getGroqChatCompletionStream() {
     return __awaiter(this, void 0, void 0, function* () {
-        // Define messages with explicit typing
+        // SYSTEM: Create messages array with system and user messages
         const messages = [
+            // SYSTEM: Add system prompt using imported function
+            // {
+            //   role: "system",
+            //   content: "ans in one word only",
+            // },
             {
                 role: "user",
                 content: "what is 2+2",
@@ -81,8 +88,7 @@ function getGroqChatCompletionStream() {
         return groq.chat.completions.create({
             messages,
             model: "llama3-8b-8192",
-            max_tokens: 1000,
-            temperature: 0.7,
+            // STREAM: Add stream option to true for streaming response
             stream: true,
         });
     });
