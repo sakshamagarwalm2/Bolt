@@ -1,7 +1,7 @@
 # Bolt The Website Creator
 ## Overview:
 Bolt The Website Creator is an AI-powered web application that can generate code for websites using React or Node.js, based on user prompts. It was inspired by the popular Bolt.new platform.
-![Alt text](public/Screenshot 2024-12-04 123058.png)
+![Example Image](public/Screenshot 2024-12-04 123058.png)
 
 ## Key Features:
 - #### AI-Powered Website Generation:
