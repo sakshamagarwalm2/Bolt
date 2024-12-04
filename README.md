@@ -55,4 +55,4 @@ Contributions to Bolt The Website Creator are welcome! If you encounter any issu
 
 
 ## License
-Bolt The Website Creator is licensed under the MIT License.
+Bolt .new The Website Creator is licensed under the MIT License.
