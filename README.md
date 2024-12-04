@@ -1,7 +1,10 @@
 # Bolt The Website Creator
 ## Overview:
 Bolt The Website Creator is an AI-powered web application that can generate code for websites using React or Node.js, based on user prompts. It was inspired by the popular Bolt.new platform.
-![Example Image](./public/Screenshot 2024-12-04 123058.png)
+
+<a >
+      <img src="https://github.com/sakshamagarwalm2/Bolt/blob/main/public/Screenshot%202024-12-04%20123058.png" alt="Project Banner">
+    </a>
 
 ## Key Features:
 - #### AI-Powered Website Generation:
@@ -42,7 +45,9 @@ Bolt The Website Creator is an AI-powered web application that can generate code
 - Click the "Generate Website Plan" button to initiate the code generation process.
 - Review the generated code in the file explorer and the live preview of the website.
 - If you're satisfied with the results, you can download the generated code or continue to refine your prompts.
-![Alt text](./public/Screenshot 2024-12-04 122840.png)
+<a >
+      <img src="https://github.com/sakshamagarwalm2/Bolt/blob/main/public/Screenshot%202024-12-04%20122840.png" alt="Project Banner">
+    </a>
 ## Contributing
 Contributions to Bolt The Website Creator are welcome! If you encounter any issues or have suggestions for improvements, please feel free to open an issue or submit a pull request. We appreciate your feedback and support.
 ## License
