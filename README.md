@@ -48,7 +48,11 @@ Bolt The Website Creator is an AI-powered web application that can generate code
 <a >
       <img src="https://github.com/sakshamagarwalm2/Bolt/blob/main/public/Screenshot%202024-12-04%20122840.png" alt="Project Banner">
     </a>
+
+    
 ## Contributing
 Contributions to Bolt The Website Creator are welcome! If you encounter any issues or have suggestions for improvements, please feel free to open an issue or submit a pull request. We appreciate your feedback and support.
+
+
 ## License
 Bolt The Website Creator is licensed under the MIT License.
